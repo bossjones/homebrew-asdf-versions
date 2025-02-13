@@ -1,4 +1,4 @@
-class AsdfAT0112 < Formula
+class AsdfAT01112 < Formula
   desc "Extendable version manager with support for Ruby, Node.js, Elixir, Erlang & more"
   homepage "https://asdf-vm.com/"
   url "https://github.com/asdf-vm/asdf/archive/v0.11.2.tar.gz"
