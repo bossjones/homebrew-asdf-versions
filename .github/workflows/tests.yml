@@ -59,6 +59,7 @@ jobs:
           # brew unlink asdf
           # brew link --overwrite asdf@0.11.2
           asdf --version
+          git clone --verbose https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.11.2
 
       # - name: brew taps
       #   run: |
