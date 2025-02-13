@@ -16,8 +16,47 @@ permissions:
 jobs:
   build:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        python-version: ['3.12']
     steps:
-      - uses: actions/checkout@v4
+      - name: Set up Git repository
+        # uses: actions/checkout@main
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements-test.txt'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.20.5' # The Go version to download (if necessary) and use.
+      - run: go version
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Cache Homebrew Bundler RubyGems
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ${{ runner.os }}-rubygems-
+
+      - name: Install Homebrew Bundler RubyGems
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: brew install-bundler-gems
+
+      - run: brew test-bot --only-cleanup-before
+
+      - run: brew test-bot --only-setup
+
+      - run: brew test-bot --only-tap-syntax
 
       # Allow debugging with tmate
       - name: Setup tmate session
