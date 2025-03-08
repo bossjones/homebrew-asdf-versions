@@ -66,10 +66,10 @@ jobs:
         include:
           - os: macOS
             runner: macOS-latest
-          # - os: Linux
-          #   runner: ubuntu-latest
-          #   workdir: /github/home
-          #   container: '{"image": "ghcr.io/homebrew/ubuntu22.04:master", "options": "--user=linuxbrew"}'
+          - os: Linux
+            runner: ubuntu-latest
+            workdir: /github/home
+            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:master", "options": "--user=linuxbrew"}'
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.runner }}
     container: ${{ matrix.container && fromJSON(matrix.container) || '' }}
@@ -81,6 +81,8 @@ jobs:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
+
+
 
       - name: Cache Homebrew Bundler RubyGems
         id: cache
@@ -94,6 +96,15 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: brew install-bundler-gems
 
+      - name: Install shell dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install coreutils parallel \
+            elvish \
+            fish \
+            nushell \
+            powershell \
+            zsh
       # Allow debugging with tmate
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
@@ -108,7 +119,6 @@ jobs:
       - run: brew test-bot --only-setup
 
       - run: brew test-bot --only-tap-syntax
-
 
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
