@@ -97,7 +97,7 @@ jobs:
     container: ${{ matrix.container && fromJSON(matrix.container) || '' }}
     defaults:
       run:
-        shell: zsh
+        shell: bash
         working-directory: ${{ matrix.workdir || github.workspace }}
     steps:
       - name: Set up Homebrew
