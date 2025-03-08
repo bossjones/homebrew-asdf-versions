@@ -57,28 +57,6 @@ jobs:
               - "docs/reference/settings.md"
               - "docs/configuration/environment.md"
               # - "uv.schema.json"
-  # rspec:
-  #   strategy:
-  #     matrix:
-  #       include:
-  #         - os: macOS
-  #           runner: macOS-latest
-  #         - os: Linux
-  #           runner: ubuntu-latest
-  #   name: RSpec (${{ matrix.os }})
-  #   runs-on: ${{ matrix.runner }}
-  #   steps:
-  #     - name: Set up Homebrew
-  #       id: set-up-homebrew
-  #       uses: Homebrew/actions/setup-homebrew@master
-
-  #     - name: Set up Ruby
-  #       uses: ruby/setup-ruby@32110d4e311bd8996b2a82bf2a43b714ccc91777 # v1.221.0
-  #       with:
-  #         bundler-cache: true
-
-  #     - name: Run Homebrew/homebrew-test-bot RSpec tests
-  #       run: bundle exec rspec
 
   tests:
     permissions:

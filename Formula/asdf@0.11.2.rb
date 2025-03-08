@@ -2,72 +2,12 @@
 # frozen_string_literal: true
 
 class AsdfAT0112 < Formula
-  desc "Extendable version manager with support for Ruby, Node.js, Elixir, Erlang & more"
+  desc "Extendable version manager with support for Ruby, Node.js, Erlang & more"
   homepage "https://asdf-vm.com/"
-  version "0.11.2"
+  url "https://github.com/asdf-vm/asdf/archive/refs/tags/v0.11.2.tar.gz"
+  sha256 "8fb63f069d4c5b12778b2749652a7c059030dab5e231f0a2a03270037a3705fd"
   license "MIT"
-
-  on_macos do
-    if Hardware::CPU.intel?
-      url "https://github.com/asdf-vm/asdf/archive/v0.11.2.tar.gz"
-      sha256 "8fb63f069d4c5b12778b2749652a7c059030dab5e231f0a2a03270037a3705fd"
-
-      def install
-        bash_completion.install "completions/asdf.bash"
-        fish_completion.install "completions/asdf.fish"
-        zsh_completion.install "completions/_asdf"
-        libexec.install Dir["*"]
-        touch libexec/"asdf_updates_disabled"
-
-        bin.write_exec_script libexec/"bin/asdf"
-      end
-    end
-    if Hardware::CPU.arm?
-      url "https://github.com/asdf-vm/asdf/archive/v0.11.2.tar.gz"
-      sha256 "8fb63f069d4c5b12778b2749652a7c059030dab5e231f0a2a03270037a3705fd"
-
-      def install
-        bash_completion.install "completions/asdf.bash"
-        fish_completion.install "completions/asdf.fish"
-        zsh_completion.install "completions/_asdf"
-        libexec.install Dir["*"]
-        touch libexec/"asdf_updates_disabled"
-
-        bin.write_exec_script libexec/"bin/asdf"
-      end
-    end
-  end
-
-  on_linux do
-    if Hardware::CPU.intel?
-      url "https://github.com/asdf-vm/asdf/archive/v0.11.2.tar.gz"
-      sha256 "8fb63f069d4c5b12778b2749652a7c059030dab5e231f0a2a03270037a3705fd"
-
-      def install
-        bash_completion.install "completions/asdf.bash"
-        fish_completion.install "completions/asdf.fish"
-        zsh_completion.install "completions/_asdf"
-        libexec.install Dir["*"]
-        touch libexec/"asdf_updates_disabled"
-
-        bin.write_exec_script libexec/"bin/asdf"
-      end
-    end
-    if Hardware::CPU.arm?
-      url "https://github.com/asdf-vm/asdf/archive/v0.11.2.tar.gz"
-      sha256 "8fb63f069d4c5b12778b2749652a7c059030dab5e231f0a2a03270037a3705fd"
-
-      def install
-        bash_completion.install "completions/asdf.bash"
-        fish_completion.install "completions/asdf.fish"
-        zsh_completion.install "completions/_asdf"
-        libexec.install Dir["*"]
-        touch libexec/"asdf_updates_disabled"
-
-        bin.write_exec_script libexec/"bin/asdf"
-      end
-    end
-  end
+  head "https://github.com/asdf-vm/asdf.git", branch: "master"
 
   depends_on "autoconf"
   depends_on "automake"
@@ -78,18 +18,23 @@ class AsdfAT0112 < Formula
   depends_on "readline"
   depends_on "unixodbc"
 
+  def install
+    bash_completion.install "completions/asdf.bash"
+    fish_completion.install "completions/asdf.fish"
+    zsh_completion.install "completions/_asdf"
+    libexec.install Dir["*"]
+    touch libexec/"asdf_updates_disabled"
+
+    bin.write_exec_script libexec/"bin/asdf"
+  end
+
   def caveats
-    s = "To use asdf, add the following line to your #{shell_profile}:\n"
-
-    s += if preferred == :fish
-      "  source #{opt_libexec}/asdf.fish\n\n"
-    else
-      "  . #{opt_libexec}/asdf.sh\n\n"
-    end
-
-    s += "Restart your terminal for the settings to take effect."
-
-    s
+    <<~EOS
+      To use asdf, add the following line (or equivalent) to your shell profile
+      e.g. ~/.profile or ~/.zshrc:
+        . #{opt_libexec}/asdf.sh
+      Restart your terminal for the settings to take effect.
+    EOS
   end
 
   test do
