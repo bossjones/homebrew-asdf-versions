@@ -1,0 +1,126 @@
+name: Homebrew Formula Tests
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  #  # https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads#workflow_dispatch
+  # workflow_dispatch:
+  #  # Allow this workflow to be run manually (pushing to testpypi instead of pypi)
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: Run the build with tmate debugging enabled
+        required: false
+        default: "false"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number|| github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  determine_changes:
+    name: Determine changes
+    runs-on: ubuntu-latest
+    outputs:
+      formula_changed: ${{ steps.changed.outputs.formula_any_changed }}
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref_name }} and your repository is ${{ github.repository }}."
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: tj-actions/changed-files@v45
+        id: changed
+        with:
+          files_yaml: |
+            formula:
+              - "Formula/**/*.rb"
+              - "test_*.py"
+              - "conftest.py"
+              - "requirements-test.txt"
+
+  tests:
+    permissions:
+      contents: read
+    needs: determine_changes
+    if: ${{ needs.determine_changes.outputs.formula_changed == 'true' || github.event_name == 'workflow_dispatch' }}
+    strategy:
+      matrix:
+        include:
+          - os: macOS
+            runner: macos-latest
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Cache Homebrew Bundler RubyGems
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ${{ runner.os }}-rubygems-
+
+      - name: Install Homebrew Bundler RubyGems
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: brew install-bundler-gems
+
+      # Allow debugging with tmate if requested
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'true' }}
+        with:
+          limit-access-to-actor: true
+
+      # Setup Python for testing
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+
+      # Run Homebrew tests
+      - name: Cleanup before tests
+        run: brew test-bot --only-cleanup-before
+
+      - name: Setup test environment
+        run: brew test-bot --only-setup
+
+      - name: Check tap syntax
+        run: brew test-bot --only-tap-syntax
+
+      - name: Run formula tests
+        run: brew test-bot --only-formulae
+        if: github.event_name == 'pull_request'
+
+      # Run Python tests
+      - name: Run Python tests
+        run: |
+          pytest test_dotfiles.py -v
+
+      - name: Cleanup after tests
+        run: brew test-bot --only-cleanup-after
