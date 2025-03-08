@@ -66,17 +66,18 @@ jobs:
         include:
           - os: macOS
             runner: macOS-latest
-          - os: Linux
-            runner: ubuntu-latest
-            workdir: /github/home
-            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:master", "options": "--user=linuxbrew"}'
+          # - os: Linux
+          #   runner: ubuntu-latest
+          #   workdir: /github/home
+          #   container: '{"image": "ghcr.io/homebrew/ubuntu22.04:master", "options": "--user=linuxbrew"}'
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.runner }}
-    container: ${{ matrix.container && fromJSON(matrix.container) || '' }}
+    # container: ${{ matrix.container && fromJSON(matrix.container) || '' }}
     defaults:
       run:
         shell: bash
-        working-directory: ${{ matrix.workdir || github.workspace }}
+        # working-directory: ${{ matrix.workdir || github.workspace }}
+        working-directory: ${{ github.workspace }}
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
