@@ -115,17 +115,17 @@ jobs:
           # If you have registered one or more public SSH keys with your GitHub profile, tmate will be started such that only those keys are authorized to connect, otherwise anybody can connect to the tmate session. If you want to require a public SSH key to be installed with the tmate session, no matter whether the user who started the workflow has registered any in their GitHub profile, you will need to configure the setting limit-access-to-actor to true, like so:
           limit-access-to-actor: true
 
-      # Setup Python for testing
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12.8"
-          cache: "pip"
+      # # Setup Python for testing
+      # - name: Set up Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: "3.12.8"
+      #     cache: "pip"
 
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-test.txt
+      # - name: Install Python dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install -r requirements-test.txt
 
       - run: brew test-bot --only-cleanup-before
 
