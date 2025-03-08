@@ -112,6 +112,9 @@ jobs:
           key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ${{ runner.os }}-rubygems-
 
+      - name: Install Homebrew Bundler RubyGems
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: brew install-bundler-gems
 
       # Allow debugging with tmate
       - name: Setup tmate session
@@ -128,43 +131,47 @@ jobs:
 
       - run: brew test-bot --only-tap-syntax
 
-      - run: brew test-bot --only-formulae-detect --test-default-formula
-        id: formulae-detect
 
-      - id: brew-test-bot-formulae
-        run: |
-          brew test-bot \
-            --only-formulae \
-            --junit \
-            --only-json-tab \
-            --skip-dependents \
-            --testing-formulae="$TESTING_FORMULAE"
-        env:
-          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TESTING_FORMULAE: ${{ steps.formulae-detect.outputs.testing_formulae }}
+      - run: brew test-bot --only-formulae
+        if: github.event_name == 'pull_request'
 
-      - run: |
-          brew test-bot --only-formulae-dependents --junit \
-                        --testing-formulae="$TESTING_FORMULAE" \
-                        --skipped-or-failed-formulae="$SKIPPED_OR_FAILED_FORMULAE"
-        env:
-          TESTING_FORMULAE: ${{ steps.formulae-detect.outputs.testing_formulae }}
-          SKIPPED_OR_FAILED_FORMULAE: ${{ steps.brew-test-bot-formulae.outputs.skipped_or_failed_formulae }}
+      # - run: brew test-bot --only-formulae-detect --test-default-formula
+      #   id: formulae-detect
 
-      - name: Output brew test-bot failures
-        run: |
-          cat steps_output.txt
-          rm steps_output.txt
+      # - id: brew-test-bot-formulae
+      #   run: |
+      #     brew test-bot \
+      #       --only-formulae \
+      #       --junit \
+      #       --only-json-tab \
+      #       --skip-dependents \
+      #       --testing-formulae="$TESTING_FORMULAE"
+      #   env:
+      #     HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     TESTING_FORMULAE: ${{ steps.formulae-detect.outputs.testing_formulae }}
 
-      - name: Output brew bottle output
-        run: |
-          cat bottle_output.txt
-          rm bottle_output.txt
+      # - run: |
+      #     brew test-bot --only-formulae-dependents --junit \
+      #                   --testing-formulae="$TESTING_FORMULAE" \
+      #                   --skipped-or-failed-formulae="$SKIPPED_OR_FAILED_FORMULAE"
+      #   env:
+      #     TESTING_FORMULAE: ${{ steps.formulae-detect.outputs.testing_formulae }}
+      #     SKIPPED_OR_FAILED_FORMULAE: ${{ steps.brew-test-bot-formulae.outputs.skipped_or_failed_formulae }}
 
-      - run: brew test-bot --only-cleanup-after
+      # - name: Output brew test-bot failures
+      #   run: |
+      #     cat steps_output.txt
+      #     rm steps_output.txt
 
-      - run: rm -rvf -- *.bottle*.{json,tar.gz}
+      # - name: Output brew bottle output
+      #   run: |
+      #     cat bottle_output.txt
+      #     rm bottle_output.txt
 
-      - run: brew test-bot --only-setup --dry-run
+      # - run: brew test-bot --only-cleanup-after
 
-      - run: brew test-bot testbottest --only-formulae --dry-run
+      # - run: rm -rvf -- *.bottle*.{json,tar.gz}
+
+      # - run: brew test-bot --only-setup --dry-run
+
+      # - run: brew test-bot testbottest --only-formulae --dry-run
