@@ -30,7 +30,7 @@ jobs:
     name: Determine changes
     runs-on: ubuntu-latest
     outputs:
-      formula_changed: ${{ steps.changed.outputs.formula_any_changed }}
+      formula_changed: ${{ steps.changed.outputs.changed }}
     steps:
       - name: Dump GitHub context
         env:
@@ -42,15 +42,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: tj-actions/changed-files@v45
+      - name: Check for formula changes
         id: changed
-        with:
-          files_yaml: |
-            formula:
-              - "Formula/**/*.rb"
-              - "test_*.py"
-              - "conftest.py"
-              - "requirements-test.txt"
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -E "(Formula/.*\.rb|test_.*\.py|conftest\.py|requirements-test\.txt)"; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
 
   tests:
     permissions:

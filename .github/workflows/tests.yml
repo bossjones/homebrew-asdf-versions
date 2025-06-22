@@ -23,43 +23,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number|| github.sha }}
   cancel-in-progress: true
 jobs:
-  # https://github.com/astral-sh/uv/blob/75c26229a2d8a9c2f249fd79f5fcf7b4d9ac77bb/.github/workflows/ci.yml#L88
-  determine_changes:
-    name: Determine changes
-    runs-on: macOS-latest
-    outputs:
-      # Flag that is raised when any code is changed
-      code: ${{ steps.changed-files.outputs.code_any_changed }}
-    permissions:
-      pull-requests: read
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref_name }} and your repository is ${{ github.repository }}."
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # OR "2" -> To retrieve the preceding commit.
-      - uses: tj-actions/changed-files@v46
-        id: changed-files
-        with:
-          files_yaml: |
-            formula:
-              - "Formula/**/*.rb"
-              - "test_*.py"
-              - "conftest.py"
-              - "requirements-test.txt"
-
-      - name: List all changed files
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: |
-          for file in ${ALL_CHANGED_FILES}; do
-            echo "$file was changed"
-          done
   tests:
     permissions:
       contents: read
