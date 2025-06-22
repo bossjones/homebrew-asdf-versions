@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "allow": ["Bash(yamllint:*)"],
+    "allow": ["Bash(yamllint:*)", "Bash(find:*)"],
     "deny": []
   }
 }
