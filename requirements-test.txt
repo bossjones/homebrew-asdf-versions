@@ -27,7 +27,7 @@ pytest-cov==4.1.0
 pytest-rerunfailures
 pytest-rerunfailures==12.0
 pytest-sugar==0.9.7
-pytest==7.2.0
+pytest==9.0.3
 pyxdg==0.28
 requests==2.31.0
 rich==13.4.2
