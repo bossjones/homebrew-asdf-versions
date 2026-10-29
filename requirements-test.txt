@@ -34,5 +34,5 @@ rich==13.4.2
 six==1.16.0
 termcolor==2.3.0
 tomli==2.0.1
-urllib3==2.0.4
+urllib3==2.8.0
 wcwidth==0.2.6
